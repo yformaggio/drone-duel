@@ -19,7 +19,7 @@ def fly_fly_away(vid):
     cid = [0x00, 0x00, 0x00, 0x00]
 
     # Build the packet
-    packet = drone_packet(phase, cid, list(vid), throttle=2000)
+    packet = DronePacket(phase, cid, list(vid), throttle=2000)
     packet_bytes = packet.to_bytes()
 
     # Tune to channel 3, where we'll transmit at a 100% duty cycle
@@ -47,7 +47,7 @@ def pair_drone():
     state = SEARCHING
 
     # Initial pairing sync packet
-    sync_packet = drone_packet(phase, cid, vid).to_bytes()
+    sync_packet = DronePacket(phase, cid, vid).to_bytes()
 
     # Wait for a drone to turn on, and then pair with it
     while True:
@@ -80,7 +80,7 @@ def pair_drone():
                     time.sleep(0.25)
 
                     # Build a response packet
-                    response_packet = drone_packet(
+                    response_packet = DronePacket(
                         phase, cid, rx_packet.vid).to_bytes()
                     vid = rx_packet.vid
                     logging.debug('Received ACK, Responding')

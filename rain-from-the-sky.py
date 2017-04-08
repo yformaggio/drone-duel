@@ -14,7 +14,7 @@ from droneduel import *
 def rain_from_the_sky():
     # this packet cuts throttle to a drone, cid and vid will be filled out
     # later
-    rain_packet = drone_packet(0x55, 0, 0, throttle=969)
+    rain_packet = DronePacket(0x55, 0, 0, throttle=969)
 
     # loop through all the channels in the first channel block
     for ch in xrange(3, 19):

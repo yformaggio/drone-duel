@@ -2,19 +2,25 @@ import array
 import struct
 
 # Whitening mask
-whitening = [0xE3, 0xB1, 0x4B, 0xEA, 0x85, 0xBC, 0xE5, 0x66,
-             0x0D, 0xAE, 0x8C, 0x88, 0x12, 0x69, 0xEE, 0x1F,
-             0xC7, 0x62, 0x97, 0xD5, 0x0B, 0x79, 0xCA, 0xCC,
-             0x1B, 0x5D, 0x19, 0x10, 0x24, 0xD3, 0xDC, 0x3F,
-             0x8E, 0xC5, 0x2F]
+whitening = [
+    0xE3, 0xB1, 0x4B, 0xEA, 0x85, 0xBC, 0xE5, 0x66,
+    0x0D, 0xAE, 0x8C, 0x88, 0x12, 0x69, 0xEE, 0x1F,
+    0xC7, 0x62, 0x97, 0xD5, 0x0B, 0x79, 0xCA, 0xCC,
+    0x1B, 0x5D, 0x19, 0x10, 0x24, 0xD3, 0xDC, 0x3F,
+    0x8E, 0xC5, 0x2F
+]
 
 
-# CRC-16 calculation over 1 byte
 def crc16_update(crc, byte):
+    """ CRC-16 Calculation over 1 byte
+    :param crc: initial CRC 
+    :param byte: packet byte
+    :return: updated CRC
+    """
     poly = 0x1021
     crc ^= (byte << 8)
     for x in range(8):
-        if (crc & 0x8000):
+        if crc & 0x8000:
             crc = (crc << 1) ^ poly
         else:
             crc = crc << 1
@@ -22,14 +28,16 @@ def crc16_update(crc, byte):
     return crc
 
 
-# Reverse the bits in a byte
 def br(b):
+    """ Reverse bits in a byte
+    :param b: byte to be "reverses"
+    :return: reversed byte
+    """
     return int('{:08b}'.format(b)[::-1], 2)
 
 
-class drone_packet(object):
+class DronePacket(object):
 
-    # Constructor
     def __init__(self, phase, cid, vid, aileron=1500, elevator=1500, throttle=1500, rudder=1500, flip=0, mode=2, crc=0):
         self.address = [0xCC, 0xCC, 0xCC, 0xCC, 0xCC]
         self.phase = phase
@@ -72,7 +80,7 @@ class drone_packet(object):
         for x in range(len(payload)):
             payload[x] ^= whitening[x]
 
-        pkt = array.array('B', [0x71, 0x0F, 0x55] + payload).tostring()
+        pkt = array.array('B', [0x71, 0x0F, 0x55] + payload).tostring()     # SyncWord
         return pkt
 
     def calc_channels(self):
@@ -116,4 +124,4 @@ def parse_packet(bytes):
     crc_match = crc_calc == crc_given
 
     # Return CRC success and a the parsed packet
-    return crc_match, drone_packet(phase, cid, vid, aileron, elevator, throttle, rudder, flip, mode, crc_given)
+    return crc_match, DronePacket(phase, cid, vid, aileron, elevator, throttle, rudder, flip, mode, crc_given)
